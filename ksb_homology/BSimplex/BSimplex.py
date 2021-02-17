@@ -20,7 +20,6 @@ class BSimplex(Simplex):
             Simplex.__init__(iterable)
         self._partial=defaultdict(lambda: False)
         self._mu=defaultdict(lambda: False)
-        print("BSimplex created",self)
     
     #-------- Private methods --------
     def _checkNonDecreasing(iterable):
@@ -40,7 +39,7 @@ class BSimplex(Simplex):
     def get_partial(self, simplex, i):
 
         """I'm the 'partial' property."""
-        return self._partial.get([simplex,i],False)
+        return self._partial[simplex,i]
 
     def set_partial(self, simplex, i, value):
 
