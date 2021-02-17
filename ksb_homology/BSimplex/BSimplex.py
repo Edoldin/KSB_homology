@@ -18,6 +18,7 @@ class BSimplex(Simplex):
         """
         if isinstance(iterable, tuple):
             Simplex.__init__(iterable)
+        self._simplexsize=defaultdict(lambda: False)
         self._partial=defaultdict(lambda: False)
         self._mu=defaultdict(lambda: False)
     
@@ -36,6 +37,20 @@ class BSimplex(Simplex):
             raise Exception("iterable type must be Simplex or tuple")
 
     #-------- Public methods --------
+    def get_simplexsize(self, simplex):
+
+        """I'm the 'partial' property."""
+        return self._simplexsize[simplex]
+
+    def set_simplexsize(self, simplex, value):
+
+        self.del_simplexsize[simplex]=value
+
+
+    def del_simplexsize(self, simplex):
+
+        del self._simplexsize[simplex]
+  # _partial ------------------------------
     def get_partial(self, simplex, i):
 
         """I'm the 'partial' property."""
