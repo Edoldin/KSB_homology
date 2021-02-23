@@ -21,6 +21,11 @@ class BSimplexTest(unittest.TestCase):
         a=BSimplex((1,2,4))
         a.set_partial((1,2),2,6)
         self.assertEqual(a.get_partial((1,2),2), 6)
+    
+    def test_non_decreasing(self):
+        a=BSimplex((1,2,4))
+        a.set_partial((1,2),2,6)
+        self.assertEqual(a.get_partial((1,2),2), 6)
 
 if __name__ == '__main__':
     unittest.main()

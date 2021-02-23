@@ -1,14 +1,14 @@
 from comch import Simplex
 from collections import defaultdict
-import numpy.matlib 
-import numpy as np 
+import numpy.matlib
+import numpy as np
 class BSimplex(Simplex):
 
-    def __init__(self,iterable):
+    def __init__(self, ptuple):
         """Initializes *self*.
         PARAMETERS
         ----------
-        interable : :class:'iterable'
+        interable : :class:' ptuple'
             Used to create a :class:`tuple` of :class:`int`.
         EXAMPLE
         -------
@@ -16,40 +16,63 @@ class BSimplex(Simplex):
         >>> 
         (1,2,4)
         """
-        if isinstance(iterable, tuple):
-            Simplex.__init__(iterable)
+        if isinstance(ptuple, tuple):
+            Simplex.__init__(ptuple)
         self._simplexsize=defaultdict(lambda: False)
         self._partial=defaultdict(lambda: False)
         self._mu=defaultdict(lambda: False)
     
     #-------- Private methods --------
-    def _checkNonDecreasing(iterable):
-        bool(lambda test_list: reduce(lambda i, j: j if 
-                 i < j else 9999, test_list) != 9999)
+    def _is_non_decreasing(ptuple):
+        return ptuple.reduce(lambda a,b : b if b > a else 9999) != 9999
+
+    def _is_subsecuence(simplex_base,simplex2, m, n):
+        if len(simplex) == 0:
+            return True
+        if len(simplex_base) == 0:
+            return False
+
+        # If last characters of two 
+        # strings are matching
+        if string1[m-1] == string2[n-1]:
+        return _is_subsecuence(string1, string2, m-1, n-1)
+ 
+        # If last characters are not matching
+        return _is_subsecuence(string1, string2, m, n-1)
 
     @staticmethod
-    def _toSimplex(iterable):
-        if isinstance(iterable, Simplex):
-            return iterable
-        elif isinstance(iterable, tuple):
-            return Simplex(iterable)
+    def _toSimplex(ptuple):
+        if isinstance( ptuple, Simplex):
+            return  ptuple
+        elif isinstance( ptuple, tuple):
+            return Simplex( ptuple)
         else:
-            raise Exception("iterable type must be Simplex or tuple")
+            raise Exception(" ptuple type must be Simplex or tuple")
 
     #-------- Public methods --------
-    def get_simplexsize(self, simplex):
+    def is_valid(self):
+        if len(self)<=0 : return False
+        if _is_non_decreasing(self) : return False
+        #continue with more conditions
+        return True
 
-        """I'm the 'partial' property."""
+    def is_face(self,simplex):
+        return _is_subsecuence(self, simplex, len(self), len(simplex))
+
+    # _simplexsize -------------------------
+    def get_ss(self, simplex):
+        """I'm the 'simplex size' property."""
         return self._simplexsize[simplex]
 
-    def set_simplexsize(self, simplex, value):
+    def set_ss(self, simplex, value):
 
         self.del_simplexsize[simplex]=value
 
 
-    def del_simplexsize(self, simplex):
+    def del_ss(self, simplex):
 
         del self._simplexsize[simplex]
+
   # _partial ------------------------------
     def get_partial(self, simplex, i):
 
@@ -64,7 +87,7 @@ class BSimplex(Simplex):
     def del_partial(self, simplex, i):
 
         del self._partial[simplex,i]
-    
+
     # _mu --------------------------------
     def get_mu(self, simplex, j, l):
         """I'm the 'mu' property."""
