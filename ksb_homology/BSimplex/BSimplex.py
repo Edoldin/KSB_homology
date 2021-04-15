@@ -106,11 +106,11 @@ class BSimplex(Simplex):
 
     def nCounter(self, bot, top):
 
-        def mergeVertexAxis(vertices,edges):
+        def mergeVertexAxis(vertexValues,edges):
             vector=[]
             for e,i in enumerate(edges):
-                vector.append(vertices[i],e)
-            vector.append(vertices[-1])
+                vector.append(vertexValues[i],e)
+            vector.append(vertexValues[-1])
             return vector
 
         def lexicographicNextValue(value,bound):
@@ -133,8 +133,8 @@ class BSimplex(Simplex):
                 if list1[k]!=list2[k]:
                     return list1[0]>list2[0]
                 k+=1
-        def getVertexDifPosition(vertices):
-            for v,k in enumerate(vertices):
+        def getVertexDifPosition(vertexValues):
+            for v,k in enumerate(vertexValues):
                 if(v!=1):
                     return k
             return 0
@@ -146,33 +146,32 @@ class BSimplex(Simplex):
             vertexBounds.append(self.get_simplexsize(simplex) or 0)#el 0 es un valor válido
         vertexBounds.reverse()
         solution=[]
-        vertices=np.ones(len(vertexBounds), dtype=int)
+        vertexValues=np.ones(len(vertexBounds), dtype=int)
         # this is inefficient since i'm getting all partial for each vertex iteration
         # and the partial only changes when a vertex changes so i could only get once
         # I'm also not generating the nCounter in the lexicographic order
         
         # si hay algún 0 retornar una lista vacía
         #ver que si hay algún 0 no entre en un bucle infinito
-        while not np.array_equal(vertices, vertexBounds):
-            pares=[]
-            while len(pares)+1 != len(vertices):
-                pares.append((vertices[len(pares)],vertices[len(pares)+1]))
+        while not np.array_equal(vertexValues, vertexBounds):
+            edges_vertex_value=[]
+            while len(edges_vertex_value)+1 != len(vertexValues):
+                edges_vertex_value.append((vertexValues[len(edges_vertex_value)],vertexValues[len(edges_vertex_value)+1]))
             
             edgesBounds=[]
-            k=getVertexDifPosition(vertices)
+            k=getVertexDifPosition(vertexValues)
             
-            print(k, path)
-            for par, posicion in enumerate(pares):
-                print(path[-k-2])
-                edgesBounds.append( self.get_partial(path[-posicion], path[-posicion-1]).diference(path[-k-2])[p[0]][p[1]] )
-                
+            for parValue, posicion in enumerate(edges_vertex_value):
+                edgesBounds.append( self.get_partial(path[-posicion], path[-posicion-1].diference(path[-posicion-2])[parValue[0]][parValue[1]] ))
+
             edges=np.ones(len(vertexBounds)-1, dtype=int) #-k, dtype=int)
             while not np.array_equal(edgesBounds, edges):
-                solucion.append(mergeVertexAxis(vertices, edges))
+                solucion.append(mergeVertexAxis(vertexValues, edges))
                 edges=lexicographicNextValue(edges,edgesBounds)
 
-            nC.append(tuple(vertices))
-            vertices=lexicographicNextValue(vertices,vertexBounds)
+            nC.append(tuple(vertexValues))
+            vertexValues=lexicographicNextValue(vertexValues,vertexBounds)
+
         return solution.sort(key=solutionOrder)
 
     def build_S(self):
