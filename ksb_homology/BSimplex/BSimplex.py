@@ -91,12 +91,11 @@ class BSimplex(Simplex):
         print("bot,top",bottom, top)
         way=set(top).difference(set(bottom))
         way=sorted(way, reverse=True)
-        path=[bottom]
+        path=[tuple(bottom)]
         for k in way:
             copy=list(path[-1])
             bisect.insort(copy, k)
             path.append(tuple(copy))
-        path.append(top)
         print("path",path)
         return tuple(path)
 
@@ -108,12 +107,13 @@ class BSimplex(Simplex):
 
         def mergeVertexAxis(vertexValues,edges):
             vector=[]
-            for e,i in enumerate(edges):
-                vector.append(vertexValues[i],e)
+            for i,e in enumerate(edges):
+                vector.extend([vertexValues[i],e])
             vector.append(vertexValues[-1])
             return vector
 
         def lexicographicNextValue(value,bound):
+            print(value, bound, len(value),len(bound))
             k=len(bound)-1
             value[k]+=1
             while bound[k]<value[k] and k<0:
@@ -139,19 +139,19 @@ class BSimplex(Simplex):
                     return k
             return 0
 
-        path=self.path(bot,top)
+        path=self.path(bot,top).reverse() #el primer elemento es el más alto
         vertexBounds=[]
         for simplex in path:
             "if simplex size not defined use 1"
-            vertexBounds.append(self.get_simplexsize(simplex) or 0)#el 0 es un valor válido
-        vertexBounds.reverse()
+            ss=self.get_simplexsize(simplex)
+            if ss : vertexBounds.append(ss)
+            else : return []
         solution=[]
         vertexValues=np.ones(len(vertexBounds), dtype=int)
         # this is inefficient since i'm getting all partial for each vertex iteration
         # and the partial only changes when a vertex changes so i could only get once
         # I'm also not generating the nCounter in the lexicographic order
         
-        # si hay algún 0 retornar una lista vacía
         #ver que si hay algún 0 no entre en un bucle infinito
         while not np.array_equal(vertexValues, vertexBounds):
             edges_vertex_value=[]
@@ -160,17 +160,25 @@ class BSimplex(Simplex):
             
             edgesBounds=[]
             k=getVertexDifPosition(vertexValues)
-            
-            for parValue, posicion in enumerate(edges_vertex_value):
-                edgesBounds.append( self.get_partial(path[-posicion], path[-posicion-1].diference(path[-posicion-2])[parValue[0]][parValue[1]] ))
+            for posicion, parValue in enumerate(edges_vertex_value):
+                partialSimplex=path[-posicion]
+                partialNumber=set(path[-posicion-1]).difference(set(path[-posicion-2])).pop()
+                partial=self.get_partial(partialSimplex, partialNumber)
+                print("partial: simplex, number, value:", partialSimplex, partialNumber, partial)
+                if not partial: return[]
+                edgesBounds.append(partial[parValue[0]][parValue[1]])
 
             edges=np.ones(len(vertexBounds)-1, dtype=int) #-k, dtype=int)
             while not np.array_equal(edgesBounds, edges):
-                solucion.append(mergeVertexAxis(vertexValues, edges))
+                solution.append(mergeVertexAxis(vertexValues, edges))
                 edges=lexicographicNextValue(edges,edgesBounds)
+                print("edges", edges, edgesBounds)
+                if not edges: break
 
             nC.append(tuple(vertexValues))
             vertexValues=lexicographicNextValue(vertexValues,vertexBounds)
+            print("vertexValues", vertexValues)
+            if not vertexValues: break
 
         return solution.sort(key=solutionOrder)
 

@@ -5,7 +5,8 @@ from ksb_homology.utils import *
 class BSimplexTest(unittest.TestCase):
 
     def test_calculate_index(self):
-    
+        return 1
+
     def test_make_vector(self):
         self.assertEqual( make_vector( (1,2,3,4), 7 ), (True,True,True,True,False,False,False))
         self.assertEqual( make_vector( (3,5,6), 8 ), (False,False,True,False,True,True,False,False))

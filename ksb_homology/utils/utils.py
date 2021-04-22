@@ -173,7 +173,7 @@ def increase(parallel, circ, remain, level):
 def local_check(xc,yc,sc,tc,parallel,circ,remain) #no implementar hasta que la nCounter funcione
     #lo único que mira es que xcounter y scounter sean menores que ycounter, tcounter
 
-def local_change(xc,sc,level,pivot,parpivot):
+def local_change(xc,sc,level,pivot,parpivot): #cambia el total adapted
     #t= ( (xsCounter), (ytcounter) )
     return True
     #indefinido
