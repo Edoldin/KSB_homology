@@ -76,6 +76,12 @@ def add(T,pair):
         T[pair(0)]=pair(1)
     else:
         T[pair(0)]=T[pair(0)] ^ pair(1)
+#total[k]=((xc,sc),(yc,tc)) implementar clase NCounter() con los métodos:
+    #total[k][0]=lista intercalada xcounter
+    #total[k][1]=lista intercalada ycounter
+# getXkey()
+# getSkey()
+# total[1][::2]
 
 def smash(X, top, bottom, x, y ):
     n=len(top)-len(bottom)
@@ -100,6 +106,7 @@ def smash(X, top, bottom, x, y ):
         for nC1 in range(0,nCounters): # Si n = 3 xCounter=(1,1,1)=xCounters[0]
             for nC2 in range(nC1+1,nCounters):
                 total.append((nC1,nC2)) #nC1 (xCounter, sCounter) nC2 (Ycounter, tCounter)
+
         global_smash(top, bot, tuple(total))
 
 def global_smash(top,bot, total):

@@ -96,7 +96,7 @@ class BSimplex(Simplex):
             copy=list(path[-1])
             bisect.insort(copy, k)
             path.append(tuple(copy))
-        print("path",path)
+        print("path",path.reverse())
         return tuple(path)
 
     def checkPartial(self, simplex1, simplex2, i1, i2):
@@ -139,7 +139,7 @@ class BSimplex(Simplex):
                     return k
             return 0
 
-        path=self.path(bot,top).reverse() #el primer elemento es el más alto
+        path=self.path(bot,top) #el primer elemento es el más alto
         vertexBounds=[]
         for simplex in path:
             "if simplex size not defined use 1"
@@ -161,8 +161,8 @@ class BSimplex(Simplex):
             edgesBounds=[]
             k=getVertexDifPosition(vertexValues)
             for posicion, parValue in enumerate(edges_vertex_value):
-                partialSimplex=path[-posicion]
-                partialNumber=set(path[-posicion-1]).difference(set(path[-posicion-2])).pop()
+                partialSimplex=path[+posicion]
+                partialNumber=set(path[+posicion+1]).difference(set(path[+posicion+2])).pop()
                 partial=self.get_partial(partialSimplex, partialNumber)
                 print("partial: simplex, number, value:", partialSimplex, partialNumber, partial)
                 if not partial: return[]
