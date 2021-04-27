@@ -1,6 +1,7 @@
 from comch import Simplex
 from collections import defaultdict
 from collections.abc import Iterable
+from ksb_homology.NCounter import NCounter as NC
 import numpy.matlib
 import numpy as np
 import bisect
@@ -88,6 +89,7 @@ class BSimplex(Simplex):
         return BSimplex.is_subsecuence(self, simplex, len(self), len(simplex))
 
     def path(self,bottom, top):
+        "fc: the standard path of simplices from bottom to top"
         print("bot,top",bottom, top)
         way=set(top).difference(set(bottom))
         way=sorted(way, reverse=True)
@@ -104,41 +106,7 @@ class BSimplex(Simplex):
         p2=get_partial(simplex2,i2)
 
     def nCounter(self, bot, top):
-
-        def mergeVertexAxis(vertexValues,edges):
-            vector=[]
-            for i,e in enumerate(edges):
-                vector.extend([vertexValues[i],e])
-            vector.append(vertexValues[-1])
-            return vector
-
-        def lexicographicNextValue(value,bound):
-            print(value, bound, len(value),len(bound))
-            k=len(bound)-1
-            value[k]+=1
-            while bound[k]<value[k] and k<0:
-                value[k]=1
-                k-=1
-                value[k]+=1
-            return value
-
-        def solutionOrder(list1, list2):
-            if list1[0]!=list2[0]:
-                return list1[0]>list2[0]
-            if list1[1]!=list2[1]:
-                return list1[1]>list2[1]
-            #list1 and list2 have the same length
-            k=2
-            while k<len(list1):
-                if list1[k]!=list2[k]:
-                    return list1[0]>list2[0]
-                k+=1
-        def getVertexDifPosition(vertexValues):
-            for v,k in enumerate(vertexValues):
-                if(v!=1):
-                    return k
-            return 0
-
+        "fc: the standard path of vertices (simplex) from bottom to top. In tests: [(1),(1,3),(1,2,3)] or [(),(1),(0,1)]"
         path=self.path(bot,top) #el primer elemento es el más alto
         vertexBounds=[]
         for simplex in path:
@@ -146,20 +114,24 @@ class BSimplex(Simplex):
             ss=self.get_simplexsize(simplex)
             if ss : vertexBounds.append(ss)
             else : return []
+        "fc: the path of simplexsizes from top to bottom [2,3,2] o [2,2,2]"
         solution=[]
-        vertexValues=np.ones(len(vertexBounds), dtype=int)
+        "fc: this is the initialiation of xcounter"
+        vertexValues=np.ones(len(vertexBounds), dtype=int) 
         # this is inefficient since i'm getting all partial for each vertex iteration
         # and the partial only changes when a vertex changes so i could only get once
         # I'm also not generating the nCounter in the lexicographic order
         
         #ver que si hay algún 0 no entre en un bucle infinito
+        "fc: Suppose vertexValues = [2,3,1] o [2,1,2] (arranged from top to bottom)"
         while not np.array_equal(vertexValues, vertexBounds):
+            "fc: the (n-1)-list of all consecutive pairs of values [[2,3],[3,1]] o [[2,1],[1,2]] (arranged from top to bottom)"
             edges_vertex_value=[]
             while len(edges_vertex_value)+1 != len(vertexValues):
                 edges_vertex_value.append((vertexValues[len(edges_vertex_value)],vertexValues[len(edges_vertex_value)+1]))
-            
+            "fc: the (n-1)-list of all bounds of the edges at the positions given by vertexValues. (not defined in the first test), [3,2]"
             edgesBounds=[]
-            k=getVertexDifPosition(vertexValues)
+            k=NC.getVertexDifPosition(vertexValues)
             for posicion, parValue in enumerate(edges_vertex_value):
                 partialSimplex=path[+posicion]
                 partialNumber=set(path[+posicion+1]).difference(set(path[+posicion+2])).pop()
@@ -169,18 +141,18 @@ class BSimplex(Simplex):
                 edgesBounds.append(partial[parValue[0]][parValue[1]])
 
             edges=np.ones(len(vertexBounds)-1, dtype=int) #-k, dtype=int)
+            "fc:produces scounters compatible with xcounter: [1,1], [1,2], [2,1], [2,2], [3,1], [3,3] and then merges them"
             while not np.array_equal(edgesBounds, edges):
-                solution.append(mergeVertexAxis(vertexValues, edges))
-                edges=lexicographicNextValue(edges,edgesBounds)
+                solution.append( NC.mergeVertexAxis(vertexValues, edges) )
+                edges=NC.lexicographicNextValue(edges,edgesBounds)
                 print("edges", edges, edgesBounds)
                 if not edges: break
 
-            nC.append(tuple(vertexValues))
-            vertexValues=lexicographicNextValue(vertexValues,vertexBounds)
+            vertexValues=NC.lexicographicNextValue(vertexValues,vertexBounds)
             print("vertexValues", vertexValues)
             if not vertexValues: break
 
-        return solution.sort(key=solutionOrder)
+        return solution.sort(key=NC.listOrder)
 
     def build_S(self):
         S=[]
