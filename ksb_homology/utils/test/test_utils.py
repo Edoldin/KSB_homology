@@ -1,3 +1,8 @@
+import sys
+ksb_homology_path="C:\\Users\\pjnav\\Desktop\\KSB_homology"
+if ksb_homology_path not in sys.path:
+    sys.path.append(ksb_homology_path)
+
 import unittest
 from ksb_homology.BSimplex import BSimplex as BS
 from ksb_homology.utils import *

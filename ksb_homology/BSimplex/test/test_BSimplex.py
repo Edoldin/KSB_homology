@@ -1,3 +1,8 @@
+import sys
+ksb_homology_path="C:\\Users\\pjnav\\Desktop\\KSB_homology"
+if ksb_homology_path not in sys.path:
+    sys.path.append(ksb_homology_path)
+
 import unittest
 import numpy.matlib
 import numpy as np
@@ -42,9 +47,10 @@ class BSimplexTest(unittest.TestCase):
 
     def test_path(self):
         a=BS((1,2,3,4,5,6))
-        self.assertEqual(a.path((1,2),(1,2,4,5,6)), ((1,2),(1,2,6),(1,2,5,6),(1,2,4,5,6)))
-        self.assertEqual(a.path((1,2),(1,2,3,6)), ((1,2),(1,2,6),(1,2,3,6)))
-        self.assertEqual(a.path((1,4),(1,3,4,6)), ((1,4),(1,4,6),(1,3,4,6)))
+        print(a.path((1,2),(1,2,4,5,6)))
+        self.assertEqual(a.path((1,2),(1,2,4,5,6)), ((1,2,4,5,6),(1,2,5,6),(1,2,6),(1,2)))
+        self.assertEqual(a.path((1,2),(1,2,3,6)), ((1,2,3,6),(1,2,6),(1,2)))
+        self.assertEqual(a.path((1,4),(1,3,4,6)), ((1,3,4,6),(1,4,6),(1,4)))
 
     '''def test_nCounter(self):
         a=BS((1,2,3,4))

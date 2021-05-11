@@ -4,4 +4,9 @@ print("------------------------------------- ")
 print("Running all test:")
 for test in glob.glob("**/test/*.py", recursive=True):
     print("    Running test: "+test)
-    exec(open(test).read())
+    try:
+        exec(open(test).read())
+    except:
+        print("###########  "+test+" failed ###########")
+        continue
+    print("###########  "+test+" finished ###########")

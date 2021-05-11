@@ -109,7 +109,7 @@ def smash(X, top, bottom, x, y ):
 
         global_smash(top, bot, tuple(total))
 
-def global_smash(top,bot, total):
+def global_smash(top, bot, total):
     paralel=[[]]
     uddot=sorted(set(top).difference(set(bot)))
     n=len(uddot)
@@ -120,6 +120,7 @@ def global_smash(top,bot, total):
         parallel[l]=circ(0)[0:l-1]
         circ[l]=circ(0)[l-1:n]
         remaining[l]=[]
+
     stop=false
     level=-1
     pivot=0
@@ -136,10 +137,51 @@ def global_smash(top,bot, total):
         pivot, parpivot, level, stop=increase(parallel, circ, remain)
     return result
 
-def global_check(total, total_adapted, parallel, circ, remain):
-    return 1
+#nc=((1,2,4,3,7),(1,3,2,9,9)),...
+#ncAdapted=total_adapted
+#nCAdapted=(((1,2,4,3,7),(1,2,4,3,7),(1,3,2,9,9), (1,3,2,9,9)))
+#n va a ser el numero de aristas nCounter tendrá longitud 2n+1
+def global_check(total, total_adapted, parallel, circ):
+    output=False
+    n=(len(total)-1)/2
+    for xcsc,yctc in total_adapted:
+        for l in range(0,n):
+            k=len(parallel[l])
+            m=len(circ[l])
+            limit1=2*k+2
+            limit2=2*k+2:2*k+2*m+2
+            if xcsc(l)[0:limit1] != ycrc(l)[0:limit1] or xcsc(l)[limit1:limit2] >= yctc(l)[limit1:limit2]:
+                return output
+        if l=n-1:
+            output=True+output
+    return output
 
 def global_change(total, total_adapted, parallel, circ, remain):
+    l=level
+    if parpivot==2:
+        for xcsc,yctc in total_adapted:
+            xcsc(l)=xcsc(l-1)
+            yctc(l)=yctc(l-1)
+    else:
+        if parpivot==1:
+            aux=circ(l-1)[0:pivot]
+            a=len(aux)
+            simp=top.difference(parallel(l-1))
+
+        if parpivot==3:
+            aux=circ(l-1)[pivot:]#final?
+            a=len(aux)
+            simp=top.difference(parallel(l-1)+circ(l-1)[0:pivot-1])
+
+        for p in range(a-2:0):
+            globalmu(simp)#falta
+            aux[p,p+1]=aux[p+1,p]
+
+    for xcsc,yctc in total_adapted:
+        for m in range(l+1:):#final?
+            xcsc[m]=xcsc[l]
+            yctc[m]=yctc[l]
+
     return 1
 
 def increase(parallel, circ, remain, level):
