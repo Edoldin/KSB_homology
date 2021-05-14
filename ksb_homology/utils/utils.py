@@ -89,9 +89,15 @@ class Utils():
         return list(resulting_list)
     
     @staticmethod
-    def ordered_intersection(priorityList,intersection):
-        resulting_list = [x for x in priorityList if x not in intersection]
+    def ordered_difference(priorityList,difference):
+        resulting_list = [x for x in priorityList if x not in difference]
         return resulting_list
+
+    @staticmethod
+    def intersection(list1,list2):
+        resulting_list = [x for x in list1 if x in list2]
+        return resulting_list
+
 
     '''def vectToWect(Si, X,ai,aic):
         ''

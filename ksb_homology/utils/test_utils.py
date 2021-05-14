@@ -30,16 +30,16 @@ class BSimplexTest(unittest.TestCase):
         self.assertEqual(ut.ordered_union(priorityList,extension, False), [4,3,5,1,2])
         self.assertEqual(ut.ordered_union(priorityList,extension, True),  [1,2,4,3,5])
 
-    def test_ordered_intersection(self):
+    def test_ordered_difference(self):
         priorityList=[1,2,4,3,5]
-        intersection=[1,2,3]
-        self.assertEqual(ut.ordered_intersection(priorityList,intersection), [4,5])
+        difference=[1,2,3]
+        self.assertEqual(ut.ordered_difference(priorityList,difference), [4,5])
         priorityList=[4,3,5,1,2]
-        self.assertEqual(ut.ordered_intersection(priorityList,intersection), [4,5])
-        intersection=[3]
-        self.assertEqual(ut.ordered_intersection(priorityList,intersection), [4,5,1,2])
-        intersection=[5,1,2]
-        self.assertEqual(ut.ordered_intersection(priorityList,intersection),  [4,3])
+        self.assertEqual(ut.ordered_difference(priorityList,difference), [4,5])
+        difference=[3]
+        self.assertEqual(ut.ordered_difference(priorityList,difference), [4,5,1,2])
+        difference=[5,1,2]
+        self.assertEqual(ut.ordered_difference(priorityList,difference),  [4,3])
 
 
 if __name__ == '__main__':

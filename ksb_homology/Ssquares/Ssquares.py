@@ -3,8 +3,8 @@ from ksb_homology.BSimplex import BSimplex as BS
 from ksb_homology.Utils import Utils
 from itertools import combinations
 import numpy as np
-class Ssquares:
 
+class Ssquares:
     @staticmethod
     def add(T,pair):
         """
@@ -26,7 +26,7 @@ class Ssquares:
     # getXkey(nC[1])
     # getSkey(nC[1])
     # nC[1]
-    '''
+    
     def smash(X, top, bottom, x, y ):
         n=len(top)-len(bottom)
         #uddot are the tags of the edges and n is the number of edges
@@ -51,8 +51,8 @@ class Ssquares:
                 for nC2 in range(nC1+1,nCounters):
                     nC.append((nC1,nC2)) #nC1 (xCounter, sCounter) nC2 (Ycounter, tCounter)
 
-            global_smash(top, bot, tuple(nC))
-    '''
+            Ssquares.global_smash(top, bottom, tuple(nC))
+    
     @staticmethod #to review and test
     def global_smash(top, bot, nC):
         uddot=sorted(set(top).difference(set(bot)))
@@ -112,44 +112,60 @@ class Ssquares:
                 output=(output+1)%2
         return output
 
-    @staticmethod
+    @staticmethod #needs review
     def increase(parallel, circ, remain, level):
         stop=True
         n=len(parallel) # is n ok?
         for l in range(n-1,0,-1):
-            if remain.o(l) == circ.o(l-1)[0]:
-                continue
-            else:
-                if len(parallel[l]) > len(parallel[l-1]):
-                    if parallel[l][-1] != circ[l-1][-1]:
-                        pivot=0# position of parallel(l) interseccion circ(l-1) en circ(l-1) plus one
-                        #estamos definiendo pivot, eso significa que no necesitamos pivot como parámetro
-                        parallel[l]=parallel[l-1]#union circ...
-                        circ[l]# eliminar la posición pivot
-                        remain[l]
-                        parpivot = True #estamos definiendo parpivot, eso significa que no necesitamos parpivot como parámetro
-                    else:
-                        pivot = len(circ[l-1])-1
-                        parallel[l] = parallel[l-1]
-                        circ[l] = circ[l-1]#\...
-                        remain[l] = remain[l-1]# intersecion ...
-                        parpivot= False
+            if len(parallel[l]) > len(parallel[l-1]):
+                if parallel[l][-1] != circ[l-1][-1]:
+                    pivot=circ[l-1].index(Utils.intersection(parallel[l],circ[l-1]))+1
+                    parallel[l]=Utils.ordered_union(parallel[l-1], circ[l-1])
+                    circ[l].pop(pivot)
+                    parpivot=1
+                    level=l
+                    break
                 else:
-                    if len(remain[l]) > len(remain[l-1]):
-                        pivot= 1#position od remain ....
-                        parallel[l]=parallel[l]
-                        circ[l]= circ[l]#\ ...
-                        remain[l]= remain[l-1]# union..
-                        parpivot=False
-                k=len(parallel[l])# k ?
-                parallel[l+1+k]=parallel[l]#with ...
-                circ[l+1+k]=circ[l]#with....
-                remain[l+1+k]=remain[l]#with...
-                level=l
-                stop=False
+                    pivot = len(circ[l-1])-1
+                    parallel[l] = parallel[l-1]
+                    circ[l].pop(pivot)
+                    remain[l] = Utils.ordered_union(circ[l-1], remain[l-1],True) #check this
+                    parpivot=2
+                    level=l
+                    break
+            else:
+                if len(remain[l]) > len(remain[l-1]):
+                    if min(remain[l]) != min(circ[l-1]):
+                        pivot=circ[l-1].index(Utils.intersection(remain[l],circ[l-1]))-1 #check -1 error en el pop de abajo
+                        circ[l].pop(pivot)
+                        remain[l]= Utils.ordered_union(circ[l-1], remain[l-1],True)
+                        parpivot=3
+                        level=l
+                        break
+                    if min(remain[l]) == min(circ[l-1]):
+                        level=l-1
+        if level!=0:
+            k=len(parallel[l])# k ?
+            parallel[l+1+k]=parallel[l]#with ...Utils.ordered_union
+            circ[l+1+k]=circ[l]#with....Utils.d
+            remain[l+1+k]=remain[l]#with...
+            level=l
+            stop=False
+            #break the loop? there is no loop
+        else:
+            stop=True
         return [pivot, parpivot, level, stop]
-    '''
-    def global_change(nC, nC_adapted, parallel, circ, remain):
+
+    @staticmethod #to review
+    def global_mu(simp,i,j,nC_adapted,l,top):
+        k=len(Utils.ordered_difference(top,simp))
+        for xCsC, yCsC in nC_adapted:
+            xC=xCsC.getXkey()
+            sC=xCsC.getSkey()
+            
+
+    @staticmethod #to review and test
+    def global_change(top, pivot, parpivot, level, nC_adapted, parallel, circ, remain):
         l=level
         if parpivot==2:
             for xcsc,yctc in nC_adapted:
@@ -159,25 +175,23 @@ class Ssquares:
             if parpivot==1:
                 aux=circ(l-1)[0:pivot]
                 a=len(aux)
-                simp=top.difference(parallel(l-1))
-
+                simp=Utils.ordered_difference(top,parallel[l-1])
             if parpivot==3:
-                aux=circ(l-1)[pivot:]#final?
+                aux=circ(l-1)[pivot:]
                 a=len(aux)
-                simp=top.difference(parallel(l-1)+circ(l-1)[0:pivot-1])
-
-            for p in range(a-2:0):
-                globalmu(simp)#falta
+                simp=Utils.ordered_difference(top,Utils.ordered_union(parallel[l-1],circ[l-1])[0:pivot-1]) # cuidado con los paréntesis, bien(?)
+            if parpivot>4:
+                #simp no está definido en el for para este caso
+                return
+            for p in range(a-2,0,-1):
+                Ssquares.globalmu(Utils.ordered_difference(simp,aux[0:p-1]),aux[p],aux[p+1],nC_adapted,l)#falta
                 aux[p,p+1]=aux[p+1,p]
 
         for xcsc,yctc in nC_adapted:
-            for m in range(l+1:):#final?
+            for m in range(l+1,0,-1): #está bien (?)
                 xcsc[m]=xcsc[l]
                 yctc[m]=yctc[l]
-
-        return 1
-'''
-    
+        return 1    
 
     #def local_check(xc,yc,sc,tc,parallel,circ,remain): #no implementar hasta que la nCounter funcione
     #lo único que mira es que xcounter y scounter sean menores que ycounter, tcounter
