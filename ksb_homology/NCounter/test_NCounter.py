@@ -1,5 +1,6 @@
-import sys
-ksb_homology_path="C:\\Users\\pjnav\\Desktop\\KSB_homology"
+import sys, os
+ksb_homology_path_list=os.path.dirname(os.path.realpath(__file__)).split("\\")[0:-2]
+ksb_homology_path= "\\".join(ksb_homology_path_list)
 if ksb_homology_path not in sys.path:
     sys.path.append(ksb_homology_path)
 

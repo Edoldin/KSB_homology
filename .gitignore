@@ -1,5 +1,6 @@
 __pycache__/
 *.pyc
 build/
+htmlcov/
 dist/
 ksb_homology.egg-info/*

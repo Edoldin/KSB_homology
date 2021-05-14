@@ -1,6 +1,3 @@
-import bisect
-import itertools
-
 class NCounter(tuple):
     def __new__(self, p_tuple):
         return tuple.__new__(NCounter, p_tuple)

@@ -2,10 +2,7 @@ from comch import Simplex
 from collections import defaultdict
 from collections.abc import Iterable
 from ksb_homology.NCounter import NCounter as NC
-import numpy.matlib
 import numpy as np
-import bisect
-import itertools
 
 class BSimplex(Simplex):
 
@@ -40,7 +37,7 @@ class BSimplex(Simplex):
     
     @staticmethod
     def proyective_2planes_product_element():
-        a=BS((0,1))
+        a=BSimplex((0,1))
         a.set_simplexsize((0,1),1)
         a.set_simplexsize((0),1)
         a.set_simplexsize((1),1)
@@ -56,7 +53,7 @@ class BSimplex(Simplex):
 
     @staticmethod
     def is_subsecuence(simplex_base,simplex2, m, n):
-        if len(simplex) == 0:
+        if len(simplex2) == 0:
             return True
         if len(simplex_base) == 0:
             return False
@@ -104,8 +101,8 @@ class BSimplex(Simplex):
         return path if not tuples else tuple(map(lambda x: tuple(x), path))
 
     def checkPartial(self, simplex1, simplex2, i1, i2):
-        p1=get_partial(simplex1,i1)
-        p2=get_partial(simplex2,i2)
+        p1=self.get_partial(simplex1,i1)
+        p2=self.get_partial(simplex2,i2)
 
     def nCounter(self, bot, top):
         "fc: the standard path of vertices (simplex) from bottom to top. In tests: [(1),(1,3),(1,2,3)] or [(),(1),(0,1)]"
@@ -113,7 +110,6 @@ class BSimplex(Simplex):
         vertexBounds=[]
         for simplex in path:
             "if simplex size not defined use 1"
-            #sets are not hasheables
             ss=self.get_simplexsize(tuple(simplex))
             if ss : vertexBounds.append(ss-1)
             else : return []
@@ -121,12 +117,6 @@ class BSimplex(Simplex):
         solution=[]
         "fc: this is the initialiation of xcounter"
         vertexValues=np.zeros(len(vertexBounds), dtype=int)
-        # this is inefficient since i'm getting all partial for each vertex iteration
-        # and the partial only changes when a vertex changes so i could only get once
-        # I'm also not generating the nCounter in the lexicographic order
-        
-        #ver que si hay algún 0 no entre en un bucle infinito
-        #aquí n es el numero de vertices
         "fc: Suppose vertexValues = [2,3,1] o [2,1,2] (arranged from top to bottom)"
         while not NC.arrayBiggerThan(vertexValues, vertexBounds):
             "fc: the (n-1)-list of all consecutive pairs of values [[2,3],[3,1]] o [[2,1],[1,2]] (arranged from top to bottom)"
@@ -147,10 +137,8 @@ class BSimplex(Simplex):
             while not NC.arrayBiggerThan(edges, edgesBounds):
                 solution.append( NC.mergeVertexAxis(vertexValues, edges) )
                 edges=NC.lexicographicNextValue(edges,edgesBounds)
-                print("edges", edges, edgesBounds)
 
             vertexValues=NC.lexicographicNextValue(vertexValues,vertexBounds)
-            print("vertexValues", vertexValues)
         return solution
 
     def build_S(self):
@@ -163,11 +151,12 @@ class BSimplex(Simplex):
     # _N -----------------------------------
     def get_N(self):
         '''
-         máximo de todos los numeros que aparecen en los símpleces del BSimplex (no tiene porqué ser la dimensión del BS)
+            máximo de todos los numeros que aparecen en los símpleces del BSimplex (no tiene porqué ser la dimensión del BS)
         '''
         N=0
-        for k in self:
-            N = k if k>N else N
+        for k in self._simplexsize:
+            for v in k:    
+                N = v if v>N else N
         return N
 
     # _simplexsize -------------------------

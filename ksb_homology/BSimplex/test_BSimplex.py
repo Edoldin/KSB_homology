@@ -1,5 +1,6 @@
-import sys
-ksb_homology_path="C:\\Users\\pjnav\\Desktop\\KSB_homology"
+import sys, os
+ksb_homology_path_list=os.path.dirname(os.path.realpath(__file__)).split("\\")[0:-2]
+ksb_homology_path= "\\".join(ksb_homology_path_list)
 if ksb_homology_path not in sys.path:
     sys.path.append(ksb_homology_path)
 
@@ -52,37 +53,16 @@ class BSimplexTest(unittest.TestCase):
         self.assertEqual(a.path((1,2),(1,2,3,6)), ((1,2,3,6),(1,2,6),(1,2)))
         self.assertEqual(a.path((1,4),(1,3,4,6)), ((1,3,4,6),(1,4,6),(1,4)))
 
-    '''def test_nCounter(self):
-        a=BS((1,2,3,4))
-        bot=(1,)
-        top=(1,2,3)
-        a.set_simplexsize((1,),1)
-        a.set_simplexsize((1,2),3)
-        a.set_simplexsize((1,2,3),2)
-        solutionVal=[(1,1,1),(1,1,2),(1,2,1),(1,2,2),(1,3,1),(1,3,2)]
-        #solutionVal=[(1,1,1),(1,1,2),(1,2,1),(1,2,2),(1,3,1),(1,3,2)]
-        #los valores intermedios estarían acotados por los partial(sinplex, n)
-        #el simplex sería
-        solution=np.array_equal(a.nCounter(bot, top), solutionVal)
-        self.assertEqual(solution, True)
-
-        a.set_simplexsize((1,),2)
-        solutionVal2=[(1,1,1),(1,1,2),(1,2,1),(1,2,2),(1,3,1),(1,3,2),
-            (2,1,1),(2,1,2),(2,2,1),(2,2,2),(2,3,1),(2,3,2)]
-        solution2=np.array_equal(a.nCounter(bot, top), solutionVal2)
-        self.assertEqual(solution2, True)    '''
-
-    def test_nCounter_2(self):
-        print("test 123")
+    def test_nCounter(self):
         a=BS((0,1))
         bot=set()
         top=((0,1))
 
-        a.set_simplexsize(tuple(),2) #vacío
+        a.set_simplexsize(tuple(),2)
         a.set_simplexsize((0,),2)
         a.set_simplexsize((1,),2)
         a.set_simplexsize((0,1),2)
-        #filas=filas
+
         partial1=np.array([[1, 3],
                            [1, 1]])
         a.set_partial((0,1),0,partial1)
@@ -99,22 +79,8 @@ class BSimplexTest(unittest.TestCase):
                            [2, 6]])
         a.set_partial((1,),1,partial4)
 
-        print("nCounter",a.nCounter(bot,top))
-
-        #buscar el valor de esto y mandarlo
-
-        #solutionVal=[(1,1,1),(1,1,2),(1,2,1),(1,2,2),(1,3,1),(1,3,2)]
-        #solutionVal=[(1,1,1),(1,1,2),(1,2,1),(1,2,2),(1,3,1),(1,3,2)]
-        #los valores intermedios estarían acotados por los partial(sinplex, n)
-        #el simplex sería
-        #solution=np.array_equal(a.nCounter(bot, top), solutionVal)
-        #self.assertEqual(solution, True)
-
-        #a.set_simplexsize((1,),2)
-        #solutionVal2=[(1,1,1),(1,1,2),(1,2,1),(1,2,2),(1,3,1),(1,3,2),
-        #    (2,1,1),(2,1,2),(2,2,1),(2,2,2),(2,3,1),(2,3,2)]
-        #solution2=np.array_equal(a.nCounter(bot, top), solutionVal2)
-        #self.assertEqual(solution2, True)
+        ncounterSolution=[(0, 0, 1, 0, 1), (0, 0, 1, 0, 2), (0, 0, 1, 0, 3), (0, 0, 1, 1, 1), (0, 0, 1, 1, 2), (0, 1, 1, 0, 1), (0, 1, 1, 0, 2), (0, 1, 1, 0, 3), (0, 1, 1, 0, 4), (0, 1, 1, 0, 5), (0, 1, 1, 0, 6), (0, 1, 1, 0, 7), (0, 1, 1, 1, 1), (0, 1, 1, 1, 2), (0, 1, 1, 1, 3), (0, 1, 1, 1, 4), (0, 1, 1, 1, 5), (0, 1, 1, 1, 6), (1, 0, 1, 0, 1), (1, 0, 1, 0, 2), (1, 0, 1, 0, 3), (1, 0, 2, 0, 0), (1, 0, 2, 0, 1), (1, 0, 2, 0, 2), (1, 0, 2, 0, 3), (1, 0, 3, 0, 0), (1, 0, 3, 0, 1), (1, 0, 3, 0, 2), (1, 0, 3, 0, 3), (1, 0, 1, 1, 1), (1, 0, 1, 1, 2), (1, 0, 2, 1, 0), (1, 0, 2, 1, 1), (1, 0, 2, 1, 2), (1, 0, 3, 1, 0), (1, 0, 3, 1, 1), (1, 0, 3, 1, 2), (1, 1, 1, 0, 1), (1, 1, 1, 0, 2), (1, 1, 1, 0, 3), (1, 1, 1, 0, 4), (1, 1, 1, 0, 5), (1, 1, 1, 0, 6), (1, 1, 1, 0, 7), (1, 1, 1, 1, 1), (1, 1, 1, 1, 2), (1, 1, 1, 1, 3), (1, 1, 1, 1, 4), (1, 1, 1, 1, 5), (1, 1, 1, 1, 6)]
+        self.assertEqual( a.nCounter(bot,top), ncounterSolution )
 
     def test_build_S(self):
         a=BS((1,2,4))
@@ -128,6 +94,9 @@ class BSimplexTest(unittest.TestCase):
     
     #def test_2_proyective_planes_product(self):
     #    a=BS.proyective_planes_product_element()
+    def test_getN(self):
+        a=BS.proyective_planes_product_element()
+        self.assertEqual(a.get_N(),1)
 
     
     def test_sub_sequences(self):
