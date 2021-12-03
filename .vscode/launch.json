@@ -10,6 +10,13 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
+        },
+        {
+            "name": "Python: run allTest",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceRoot}/ksb_homology/pass_test.py",
+            "console": "integratedTerminal",
         }
     ]
 }

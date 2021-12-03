@@ -20,13 +20,8 @@ class Ssquares:
             T[pair(0)] = pair(1)
         else:
             T[pair(0)] = T[pair(0)] ^ pair(1)
-    #nC[k]=((xc,sc),(yc,tc)) implementar clase NCounter() con los métodos:
-        #nC[k][0]=lista intercalada xcounter
-        #nC[k][1]=lista intercalada ycounter
-    # getXkey(nC[1])
-    # getSkey(nC[1])
-    # nC[1]
-    
+
+    @staticmethod # to review, to test
     def smash(X, top, bottom, x, y ):
         n=len(top)-len(bottom)
         #uddot are the tags of the edges and n is the number of edges
@@ -35,35 +30,32 @@ class Ssquares:
         sigma=X.path(bottom,top).reverse()
         #sk is a simplex in the tree
         for sk, k in enumerate(sigma):
-            #la comprobación xcounter(k+1) > ycounter(k+1) no es siempre falsa?  xcounter==ycounter
-            #                           ||
-            #lo mismo para xcounter(k+1) = ycounter(k+1) && scounter(k) > tcounter(k)
-            # xCounter= {
-            #    lista con longitud n que no coincide con el simplex size de sk en X
-            #    cada una de las entradas tiene que estar acotada con el simplex size del símplice
-            #    n=5; top= (1,2,3,4,5,6,7,8,9) bot= (1,2,3,4) X.ss(top)=5
-            #    xCounter(0)=[[1,2,3,4,5],[],[],[],[]]
-            # }
-            #for i in range(0,n):#mirar video
             nCounters=X.nCounter(top,bottom) #todas las posibles xcounters scounters
+            def filterFunc():
+                if nC1[0]==x and nC1[-1]==y:
+                    return True
+                else:
+                    return False
+            filter(filterFunc, nCounters)
+
             nC=[]
             for nC1 in range(0,nCounters): # Si n = 3 xCounter=(1,1,1)=xCounters[0]
                 for nC2 in range(nC1+1,nCounters):
                     nC.append((nC1,nC2)) #nC1 (xCounter, sCounter) nC2 (Ycounter, tCounter)
 
-            Ssquares.global_smash(top, bottom, tuple(nC))
+            Ssquares.global_smash(X, top, bottom, tuple(nC))
     
-    @staticmethod #to review and test
-    def global_smash(top, bot, nC):
+    @staticmethod # To test, reviewed
+    def global_smash(X, top, bot, nC):
         uddot=sorted(set(top).difference(set(bot)))
         n=len(uddot)
         parallel=[[]]
         remain=[[]]
         circ=[uddot]
         for l in range(1,n):
-            parallel[l]=circ(0)[0:l-1]
-            circ[l]=circ(0)[l-1:n]
-            remain[l]=[]
+            parallel.append(circ[0][0:l])
+            circ.append(circ[0][l:n])
+            remain.append([])
 
         nC_adapted=[]
         for xCsC_old,yCtC_old in nC:
@@ -73,21 +65,14 @@ class Ssquares:
                 xCsC[l]=list(xCsC_old)
                 yCtC[l]=list(yCtC_old)
             nC_adapted.append([xCsC,yCtC])
-        #   Adem´as, se introduce una lista de listas nCadapted cuyo primer ´ındice
-        #   es el de nC, cuyo segundo ´ındice se denota l y toma valores entre ...(?)
-        stop=False
-        level=-1
-        pivot=0
-        parpivot=0
-        #nC will be an inmutable tuple while nCadapted will change.
-        #nC_adapted=list(nC) (still needed?)
+
         result=Ssquares.global_check(nC, nC_adapted, parallel, circ, remain)
         # increase will modify parallel, circ, remain, level, pivot, stop
         pivot, parpivot, level, stop = Ssquares.increase(parallel, circ, remain)
         while not stop:
             #global_change only modifies nC_adapted
-            Ssquares.global_change(nC, nC_adapted, level, pivot, parpivot)
-            result=(result+Ssquares.global_check(nC, nC_adapted, parallel, circ, remain))%2
+            Ssquares.global_change(X, nC, nC_adapted, level, pivot, parpivot)
+            result=(result+Ssquares.global_check(nC_adapted, parallel, circ))%2
             pivot, parpivot, level, stop=Ssquares.increase(parallel, circ, remain)
         return result
     '''
@@ -96,103 +81,126 @@ class Ssquares:
     #nCAdapted=(((1,2,4,3,7),(1,2,4,3,7),(1,3,2,9,9), (1,3,2,9,9)))
     #n va a ser el numero de aristas nCounter tendrá longitud 2n+1
     '''
-    @staticmethod #to review and test
-    def global_check(nC, nC_adapted, parallel, circ):
+    @staticmethod #to complete and test
+    def global_check(nC_adapted, parallel, circ):
         output=0
-        n=(len(nC)-1)/2
+        n=(len(nC_adapted[0])-1)/2
         for [xcsc,yctc] in nC_adapted:
             for l in range(0,n):
                 k=len(parallel[l])
                 m=len(circ[l])
                 limit1=2*k+2
                 limit2=2*k+2*m+2
-                if xcsc(l)[0:limit1] != yctc(l)[0:limit1] or xcsc(l)[limit1:limit2] >= yctc(l)[limit1:limit2]:
-                    return output
+                if xcsc[l][0:limit1] != yctc[l][0:limit1] or xcsc[l][limit1:limit2] >= yctc[l][limit1:limit2]:
+                    break #comprobar que solo rompe el primer for y que la l tiene el valor que debe
             if l==n-1:
                 output=(output+1)%2
         return output
 
     @staticmethod #needs review
-    def increase(parallel, circ, remain, level):
-        stop=True
-        n=len(parallel) # is n ok?
+    def increase(parallel, circ, remain):
+        stop=False
+        n=len(parallel)
         for l in range(n-1,0,-1):
-            if len(parallel[l]) > len(parallel[l-1]):
+            if len(parallel[l-1]) == len(parallel[l])-1:
                 if parallel[l][-1] != circ[l-1][-1]:
-                    pivot=circ[l-1].index(Utils.intersection(parallel[l],circ[l-1]))+1
-                    parallel[l]=Utils.ordered_union(parallel[l-1], circ[l-1])
-                    circ[l].pop(pivot)
+                    pivot=circ[l-1].index(Utils.intersection(parallel[l],circ[l-1]).pop())+1
+                    parallel[l]=list(parallel[l-1])
+                    circ[l]=list(circ[l-1])
+                    parallel[l].append(circ[l].pop(pivot))
                     parpivot=1
                     level=l
                     break
                 else:
                     pivot = len(circ[l-1])-1
-                    parallel[l] = parallel[l-1]
-                    circ[l].pop(pivot)
-                    remain[l] = Utils.ordered_union(circ[l-1], remain[l-1],True) #check this
+                    parallel[l] = list(parallel[l-1])
+                    circ[l]=list(circ[l-1])
+                    remain[l] = list(remain[l-1])
+                    remain[l].insert(0,circ[l].pop(pivot))
                     parpivot=2
                     level=l
                     break
             else:
-                if len(remain[l]) > len(remain[l-1]):
-                    if min(remain[l]) != min(circ[l-1]):
-                        pivot=circ[l-1].index(Utils.intersection(remain[l],circ[l-1]))-1 #check -1 error en el pop de abajo
-                        circ[l].pop(pivot)
-                        remain[l]= Utils.ordered_union(circ[l-1], remain[l-1],True)
-                        parpivot=3
-                        level=l
-                        break
-                    if min(remain[l]) == min(circ[l-1]):
-                        level=l-1
+                if remain[l][0] != circ[l-1][0]:
+                    pivot=circ[l-1].index(Utils.intersection(remain[l],circ[l-1]).pop())-1
+                    circ[l]=list(circ[l-1])
+                    remain[l] = list(remain[l-1])
+                    remain[l].insert(0,circ[l].pop(pivot))
+                    parpivot=3
+                    level=l
+                    break
+                else:
+                    level=l-1
         if level!=0:
-            k=len(parallel[l])# k ?
-            parallel[l+1+k]=parallel[l]#with ...Utils.ordered_union
-            circ[l+1+k]=circ[l]#with....Utils.d
-            remain[l+1+k]=remain[l]#with...
+            for k in range(level+1,n):
+                circ[k]=list(circ[k-1])
+                parallel[k]=list(parallel[k-1])
+                parallel[k].append(circ[k].pop(0))
+                remain[k] = list(remain[level])
             level=l
             stop=False
-            #break the loop? there is no loop
         else:
-            stop=True
+            return [0, 0, 0, True]
         return [pivot, parpivot, level, stop]
 
-    @staticmethod #to review
-    def global_mu(simp,i,j,nC_adapted,l,top):
-        k=len(Utils.ordered_difference(top,simp))
+    @staticmethod #revied to test
+    def global_mu(X,simp,i,j,nC_adapted,level,top):
+        k=len(top)-len(simp)+1
         for xCsC, yCsC in nC_adapted:
-            xC=xCsC.getXkey()
-            sC=xCsC.getSkey()
+            lxc=xCsC[level]
+            lyc=yCsC[level]
+            l_1, l_2, l_3=2*k-1, 2*k, 2*k+2
+            xmuIn=[lxc[l_1], lxc[l_2], lxc[l_3]]
+            ymuIn=[lyc[l_1], lyc[l_2], lyc[l_3]]
+            
+            levelmuIn=2*k-3 if k != 1 else 2*k-2
+
+            lxc[l_1], lxc[l_2], lxc[l_3] = list(X.mu(simp, i, j, xCsC[levelmuIn],xCsC[2*level+1])[xmuIn])
+            lyc[l_1], lyc[l_2], lyc[l_3] = list(X.mu(simp, i, j, yCsC[levelmuIn],yCsC[2*level+1])[ymuIn])
+
+            for l in range(level+1,len(xCsC)):
+                xCsC[l] = list(xCsC[level])
+                yCsC[l] = list(yCsC[level])
             
 
-    @staticmethod #to review and test
-    def global_change(top, pivot, parpivot, level, nC_adapted, parallel, circ, remain):
-        l=level
+    @staticmethod #revied to test
+    def global_change(top, pivot, parpivot, level, nC_adapted, parallel, circ):
         if parpivot==2:
             for xcsc,yctc in nC_adapted:
-                xcsc(l)=xcsc(l-1)
-                yctc(l)=yctc(l-1)
+                xcsc[level]=list(xcsc[level-1])
+                yctc[level]=list(yctc[level-1])
         else:
             if parpivot==1:
-                aux=circ(l-1)[0:pivot]
+                aux=circ[level-1][0:pivot-1]
                 a=len(aux)
-                simp=Utils.ordered_difference(top,parallel[l-1])
+                simp=Utils.ordered_difference(top,parallel[level-1])
             if parpivot==3:
-                aux=circ(l-1)[pivot:]
+                aux=circ[level-1][pivot+1:]
                 a=len(aux)
-                simp=Utils.ordered_difference(top,Utils.ordered_union(parallel[l-1],circ[l-1])[0:pivot-1]) # cuidado con los paréntesis, bien(?)
-            if parpivot>4:
-                #simp no está definido en el for para este caso
-                return
+                simp=Utils.ordered_difference(top,Utils.ordered_union(parallel[level-1],circ[level-1])[0:pivot-1]) # cuidado con los paréntesis, bien(?)
             for p in range(a-2,0,-1):
-                Ssquares.globalmu(Utils.ordered_difference(simp,aux[0:p-1]),aux[p],aux[p+1],nC_adapted,l)#falta
+                Ssquares.globalmu(Utils.ordered_difference(simp,aux[0:p-1]),aux[p],aux[p+1],nC_adapted,level)#falta
                 aux[p,p+1]=aux[p+1,p]
 
         for xcsc,yctc in nC_adapted:
-            for m in range(l+1,0,-1): #está bien (?)
-                xcsc[m]=xcsc[l]
-                yctc[m]=yctc[l]
+            for m in range(level+1,len(xcsc)): #está bien (?)
+                xcsc[m]=xcsc[level]
+                yctc[m]=yctc[level]
         return 1    
 
+    @staticmethod #to review
+    def global_check(nCAdapted, parallel, circ, remain):
+        output=0
+        n=len(parallel)-1
+        for xcsc,yctc in nCAdapted:
+            for l in range(n):
+                k = len(parallel[l])
+                m = len(circ[l])
+                if xcsc[l][0:2*k+1] != yctc[l][0:2*k+1] or xcsc[l][0:2*k+1] != yctc[l][0:2*k+1]:
+                    break
+            if l is n-1:
+                output += 1
+        return output
     #def local_check(xc,yc,sc,tc,parallel,circ,remain): #no implementar hasta que la nCounter funcione
     #lo único que mira es que xcounter y scounter sean menores que ycounter, tcounter
 

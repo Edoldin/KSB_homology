@@ -15,11 +15,16 @@ class BSimplexTest(unittest.TestCase):
 
     def test_get_simplexsize_default(self):
         a=BS((1,2,4))
-        self.assertEqual(a.get_simplexsize((1,2)), False)
+        self.assertEqual(a.get_simplexsize((1,2)), 0)
+        self.assertRaises(TypeError, a.get_simplexsize,[1,2])
 
     def test_get_partial_default(self):
-        a=BS((1,2,4))
-        self.assertEqual(a.get_partial((1,2),2), False)
+        bsimplex=BS((1,2,4))
+        self.assertEqual(bsimplex.get_partial((1,2),2), 0)
+        bsimplex.set_simplexsize((1,2),1)
+        self.assertEqual(bsimplex.get_partial((1,2),2), 0)
+        bsimplex.set_simplexsize((1,),1)
+        self.assertRaises(Exception, bsimplex.get_partial, (1,2))
 
     def test_get_mu_default(self):
         a=BS((1,2,4))
@@ -80,7 +85,12 @@ class BSimplexTest(unittest.TestCase):
         a.set_partial((1,),1,partial4)
 
         ncounterSolution=[(0, 0, 1, 0, 1), (0, 0, 1, 0, 2), (0, 0, 1, 0, 3), (0, 0, 1, 1, 1), (0, 0, 1, 1, 2), (0, 1, 1, 0, 1), (0, 1, 1, 0, 2), (0, 1, 1, 0, 3), (0, 1, 1, 0, 4), (0, 1, 1, 0, 5), (0, 1, 1, 0, 6), (0, 1, 1, 0, 7), (0, 1, 1, 1, 1), (0, 1, 1, 1, 2), (0, 1, 1, 1, 3), (0, 1, 1, 1, 4), (0, 1, 1, 1, 5), (0, 1, 1, 1, 6), (1, 0, 1, 0, 1), (1, 0, 1, 0, 2), (1, 0, 1, 0, 3), (1, 0, 2, 0, 0), (1, 0, 2, 0, 1), (1, 0, 2, 0, 2), (1, 0, 2, 0, 3), (1, 0, 3, 0, 0), (1, 0, 3, 0, 1), (1, 0, 3, 0, 2), (1, 0, 3, 0, 3), (1, 0, 1, 1, 1), (1, 0, 1, 1, 2), (1, 0, 2, 1, 0), (1, 0, 2, 1, 1), (1, 0, 2, 1, 2), (1, 0, 3, 1, 0), (1, 0, 3, 1, 1), (1, 0, 3, 1, 2), (1, 1, 1, 0, 1), (1, 1, 1, 0, 2), (1, 1, 1, 0, 3), (1, 1, 1, 0, 4), (1, 1, 1, 0, 5), (1, 1, 1, 0, 6), (1, 1, 1, 0, 7), (1, 1, 1, 1, 1), (1, 1, 1, 1, 2), (1, 1, 1, 1, 3), (1, 1, 1, 1, 4), (1, 1, 1, 1, 5), (1, 1, 1, 1, 6)]
-        self.assertEqual( a.nCounter(bot,top), ncounterSolution )
+        path=a.path(bot,top,False) #el primer elemento es el más alto
+        nCounter=a.nCounter(path)
+        print(path)
+        for k in nCounter:
+            print(k)
+        self.assertEqual( nCounter, ncounterSolution )
 
     def test_build_S(self):
         a=BS((1,2,4))
@@ -95,7 +105,7 @@ class BSimplexTest(unittest.TestCase):
     #def test_2_proyective_planes_product(self):
     #    a=BS.proyective_planes_product_element()
     def test_getN(self):
-        a=BS.proyective_planes_product_element()
+        a=BS.proyective_2planes_product_element()
         self.assertEqual(a.get_N(),1)
 
     

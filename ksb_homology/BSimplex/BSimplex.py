@@ -1,3 +1,4 @@
+from logging import error
 from comch import Simplex
 from collections import defaultdict
 from collections.abc import Iterable
@@ -19,11 +20,11 @@ class BSimplex(Simplex):
         (1,2,4)
         """
         if isinstance(iterable, Iterable):
-            Simplex.__init__(iterable)
+            super().__init__(iterable)
         else:
             raise TypeError("BSimplex must be constructed with class iterable")
         #{simplex :int}
-        self._simplexsize=defaultdict(lambda: False)
+        self._simplexsize=defaultdict(lambda: 0)
         #{simplex, int :array}
         self._partial=defaultdict(lambda: False)
         #{simplex, simplex, int :array}
@@ -34,22 +35,57 @@ class BSimplex(Simplex):
     @staticmethod
     def strictly_increasing(iterable):
         return all(x<y for x, y in zip(iterable, iterable[1:]))
+
+    @staticmethod
+    def Projective_plane():
+        return BSimplex.Moore_space_Zn(2)
     
+    @staticmethod
+    def Moore_space_Zn(n):
+        simplex=BSimplex((0,))
+        simplex.set_simplexsize((),1)
+        simplex.set_simplexsize((0,),1)
+        simplex.set_partial((0,),0,n)
+        return simplex
+
     @staticmethod
     def proyective_2planes_product_element():
         a=BSimplex((0,1))
         a.set_simplexsize((0,1),1)
-        a.set_simplexsize((0),1)
-        a.set_simplexsize((1),1)
+        a.set_simplexsize((0,),1)
+        a.set_simplexsize((1,),1)
         a.set_simplexsize((),1)
 
         a.set_partial((0,1),0,[2])
         a.set_partial((0,1),1,[2])
-        a.set_partial((0),0,[2])
-        a.set_partial((1),1,[2])
+        a.set_partial((0,),0,[2])
+        a.set_partial((1,),1,[2])
 
         a.set_mu((0,1),0,1,[1,3,2,4])
         return a
+
+    def bijection(self, simplex, j, l, fi, ff):
+        bot=set(simplex).difference({j,l})
+        top=simplex
+        nCounter1=self.nCounter(self, [simplex,bot.add(l),bot])
+        nCounter2=self.nCounter(self, [simplex,bot.add(j),bot])
+        def filterFunc(nC):
+                if nC[0]==fi and nC[-1]==ff:
+                    return True
+                else:
+                    return False
+        filter(filterFunc, nCounter1)
+        filter(filterFunc, nCounter2)
+        if len(nCounter1)!=len(nCounter1):
+            raise Exception("nCounters don't have the same lenght")
+        biy={}
+        mu=self.get_mu(simplex,j,l)
+        for i, v in enumerate(nCounter1):
+            biy[v]=nCounter2[mu[i]]
+        return biy
+
+
+
 
     @staticmethod
     def is_subsecuence(simplex_base,simplex2, m, n):
@@ -104,9 +140,8 @@ class BSimplex(Simplex):
         p1=self.get_partial(simplex1,i1)
         p2=self.get_partial(simplex2,i2)
 
-    def nCounter(self, bot, top):
+    def nCounter(self, path):
         "fc: the standard path of vertices (simplex) from bottom to top. In tests: [(1),(1,3),(1,2,3)] or [(),(1),(0,1)]"
-        path=self.path(bot,top,False) #el primer elemento es el más alto
         vertexBounds=[]
         for simplex in path:
             "if simplex size not defined use 1"
@@ -130,9 +165,9 @@ class BSimplex(Simplex):
                 partialNumber=path[+posicion].difference(path[posicion+1]).pop()
                 partial=self.get_partial(partialSimplex, partialNumber)
                 if not partial.any(): return []
-                edgesBounds.append(partial[parValue[1]][parValue[0]])
+                edgesBounds.append(partial[parValue[1]][parValue[0]]-1)
 
-            edges=np.ones(len(vertexBounds)-1, dtype=int) #-k, dtype=int)
+            edges=np.zeros(len(vertexBounds)-1, dtype=int) #-k, dtype=int)
             "fc:produces scounters compatible with xcounter: [1,1], [1,2], [2,1], [2,2], [3,1], [3,3] and then merges them"
             while not NC.arrayBiggerThan(edges, edgesBounds):
                 solution.append( NC.mergeVertexAxis(vertexValues, edges) )
@@ -154,8 +189,8 @@ class BSimplex(Simplex):
             máximo de todos los numeros que aparecen en los símpleces del BSimplex (no tiene porqué ser la dimensión del BS)
         '''
         N=0
-        for k in self._simplexsize:
-            for v in k:    
+        for key in self._simplexsize:
+            for v in key:
                 N = v if v>N else N
         return N
 
@@ -168,10 +203,17 @@ class BSimplex(Simplex):
 
     def get_simplexsize(self, simplex):
         """I'm the 'simplex size' property."""
+        if isinstance(simplex, int):
+            return self._simplexsize[tuple(simplex)]
         return self._simplexsize[simplex]
 
     def set_simplexsize(self, simplex, value):
-        self._simplexsize[simplex]=value
+        if isinstance(simplex, int):
+            self._simplexsize[tuple(simplex)]=value
+        elif isinstance(simplex, tuple):
+            self._simplexsize[simplex]=value
+        else:
+            raise TypeError("simplex key can only be tuples or int")
 
 
     def del_simplexsize(self, simplex):
@@ -181,15 +223,22 @@ class BSimplex(Simplex):
   # _partial ------------------------------
     def get_partial(self, simplex, i):
         """I'm the 'partial' property."""
-        return self._partial[simplex,i]
+        partial = self._partial[simplex,i]
+        if partial is False:
+            l_simplex=list(simplex)
+            if i in l_simplex:
+                l_simplex.remove(i)
+            if self._simplexsize[simplex] == 0 or self._simplexsize[tuple(l_simplex)] == 0:
+                return 0
+            else:
+                raise Exception("partial of simplex", simplex, "should be explicitely defined")
+        else:
+            return self._partial[simplex,i]
 
     def set_partial(self, simplex, i, value):
-
         self._partial[simplex,i]=value
 
-
     def del_partial(self, simplex, i):
-
         del self._partial[simplex,i]
 
     # _mu --------------------------------
@@ -199,8 +248,8 @@ class BSimplex(Simplex):
         return self._mu[simplex,j,l]
 
     def set_mu(self, simplex, j, l, value):
-
-        self.mu[simplex,j,l]=value
+        '''mu ha de ser una aplicacón que va de nCounters a nCounters'''
+        self._mu[simplex,j,l]=value
 
     def del_mu(self, simplex, j, l):
 
