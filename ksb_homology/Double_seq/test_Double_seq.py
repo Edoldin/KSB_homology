@@ -5,9 +5,9 @@ if ksb_homology_path not in sys.path:
     sys.path.append(ksb_homology_path)
 
 import unittest
-from ksb_homology.NCounter import NCounter as NC
+from ksb_homology.Double_seq import Double_seq as NC
 
-class NCounterTest(unittest.TestCase):
+class Double_seqTest(unittest.TestCase):
 
     def test_getXkey(self):
         nc1=NC((1,2,2,4,1,3,2,4,3))

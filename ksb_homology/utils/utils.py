@@ -1,4 +1,5 @@
 from collections import deque
+from unittest import result
 class Utils():
     @staticmethod
     def calculate_index( aiC_U_ajC, top, Udot ):
@@ -98,6 +99,31 @@ class Utils():
         resulting_list = [x for x in list1 if x in list2]
         return resulting_list
 
+    @staticmethod
+    def matrix_direct_sum_2d(m1, m2):
+        '''
+            m1=[[1,1,1,1],  m2=[[2,2,2,2],
+                [1,1,1,1],      [2,2,2,2],
+                [1,1,1,1]]      [2,2,2,2]]
+            m1+m2=[ [1,1,1,1,0,0,0,0],
+                    [1,1,1,1,0,0,0,0],
+                    [1,1,1,1,0,0,0,0],
+                    [0,0,0,0,2,2,2,2],
+                    [0,0,0,0,2,2,2,2],
+                    [0,0,0,0,2,2,2,2] ]
+        '''
+        if m1 is False:
+            return m2
+        if m2 is False:
+            return m1
+        zeros_m1=len(m1[0])
+        zeros_m2=len(m2[0])
+        direct_sum=[]
+        for v in m1:
+            direct_sum.append(v+(zeros_m2*[0]))
+        for v in m2:
+            direct_sum.append(zeros_m1*[0]+v)
+        return direct_sum
 
     '''def vectToWect(Si, X,ai,aic):
         ''

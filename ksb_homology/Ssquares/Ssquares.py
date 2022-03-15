@@ -1,5 +1,5 @@
 from collections import defaultdict
-from ksb_homology.BSimplex import BSimplex as BS
+from ksb_homology.BurnsideCube import BurnsideCube as BS
 from ksb_homology.Utils import Utils
 from itertools import combinations
 import numpy as np
@@ -30,17 +30,17 @@ class Ssquares:
         sigma=X.path(bottom,top).reverse()
         #sk is a simplex in the tree
         for sk, k in enumerate(sigma):
-            nCounters=X.nCounter(top,bottom) #todas las posibles xcounters scounters
+            double_seqs=X.double_seq(top,bottom) #todas las posibles xcounters scounters
             def filterFunc():
                 if nC1[0]==x and nC1[-1]==y:
                     return True
                 else:
                     return False
-            filter(filterFunc, nCounters)
+            filter(filterFunc, double_seqs)
 
             nC=[]
-            for nC1 in range(0,nCounters): # Si n = 3 xCounter=(1,1,1)=xCounters[0]
-                for nC2 in range(nC1+1,nCounters):
+            for nC1 in range(0,double_seqs): # Si n = 3 xCounter=(1,1,1)=xCounters[0]
+                for nC2 in range(nC1+1,double_seqs):
                     nC.append((nC1,nC2)) #nC1 (xCounter, sCounter) nC2 (Ycounter, tCounter)
 
             Ssquares.global_smash(X, top, bottom, tuple(nC))
@@ -79,7 +79,7 @@ class Ssquares:
     #nc=((1,2,4,3,7),(1,3,2,9,9)),...
     #ncAdapted=nC_adapted
     #nCAdapted=(((1,2,4,3,7),(1,2,4,3,7),(1,3,2,9,9), (1,3,2,9,9)))
-    #n va a ser el numero de aristas nCounter tendrá longitud 2n+1
+    #n va a ser el numero de aristas double_seq tendrá longitud 2n+1
     '''
     @staticmethod #to complete and test
     def global_check(nC_adapted, parallel, circ):
@@ -97,7 +97,7 @@ class Ssquares:
                 output=(output+1)%2
         return output
 
-    @staticmethod #needs review
+    @staticmethod #Tested
     def increase(parallel, circ, remain):
         stop=False
         n=len(parallel)
@@ -201,7 +201,7 @@ class Ssquares:
             if l is n-1:
                 output += 1
         return output
-    #def local_check(xc,yc,sc,tc,parallel,circ,remain): #no implementar hasta que la nCounter funcione
+    #def local_check(xc,yc,sc,tc,parallel,circ,remain): #no implementar hasta que la double_seq funcione
     #lo único que mira es que xcounter y scounter sean menores que ycounter, tcounter
 
     #def local_change(xc,sc,level,pivot,parpivot): #cambia el nC adapted
@@ -227,7 +227,7 @@ class Ssquares:
     def kth_steenrod_square( k, X, S):
         '''
             k>0 int
-            X   BSimplex
+            X   BurnsideCube
             S a collection of pairs (ai,(xi,...)) xi<simplexsize de ai en X
             ai is a simplex in X
             #d? dimensión de todos los símplices ai, todos deben tener la misma dimensión
@@ -243,7 +243,7 @@ class Ssquares:
                 #rep=d+k+1-len(ai.union(aj)) d+1=len(ai) dimensión de todos los símplices ai, todos deben tener la misma dimensión
                 rep = len(ai)+k-len(ai.union(aj))
                 if rep>0:
-                    #Uddot it's a simplex of length rep so is this all the subsimplex of length rep in {0,..,n}?
+                    #Uddot it's a simplex of length rep so is this all the suBurnsideCube of length rep in {0,..,n}?
                     for Uddot in list(combinations(set(range(0,X.get_N())).difference(bottom), rep)):
                         top = bottom.union(Uddot)
                         aiC = ai.difference(aj)

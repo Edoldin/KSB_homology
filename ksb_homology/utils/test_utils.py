@@ -7,7 +7,7 @@ if ksb_homology_path not in sys.path:
 import unittest
 from ksb_homology.Utils import Utils as ut
 
-class BSimplexTest(unittest.TestCase):
+class BurnsideCubeTest(unittest.TestCase):
 
     def test_calculate_index(self):
         return 1

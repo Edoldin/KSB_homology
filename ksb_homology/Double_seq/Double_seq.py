@@ -1,15 +1,15 @@
-class NCounter(tuple):
+class Double_seq(tuple):
     def __new__(self, p_tuple):
-        return tuple.__new__(NCounter, p_tuple)
+        return tuple.__new__(Double_seq, p_tuple)
 
-    def getXkey(self):
+    def get_vertex_seq(self):
         vector=[self[0]]
         for i in range(1,len(self)):
             if i%2!=0:
                 vector.append(self[i])
         return vector
 
-    def getSkey(self):
+    def get_seqEdges(self):
         vector=[]
         for i in range(2,len(self)):
             if i%2==0:
@@ -17,11 +17,15 @@ class NCounter(tuple):
         return vector
 
     @staticmethod
-    def mergeVertexAxis(vertexValues,edges):
+    def svse_to_s(Double_seq):
+        return tuple(Double_seq.get_vertex_seq(),Double_seq.get_seqEdges())
+
+    @staticmethod
+    def merge_sVertexEdges(vertexValues,edges):
         vector=[vertexValues[0]]
         for i,e in enumerate(edges):
             vector.extend([vertexValues[i+1],e])
-        return NCounter(vector)
+        return Double_seq(vector)
 
     @staticmethod
     def lexicographicNextValue(value,bound):
