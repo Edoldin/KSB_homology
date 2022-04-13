@@ -1,4 +1,5 @@
 from collections import deque
+from typing import Any
 from unittest import result
 class Utils():
     @staticmethod
@@ -112,7 +113,7 @@ class Utils():
                     [0,0,0,0,2,2,2,2],
                     [0,0,0,0,2,2,2,2] ]
         '''
-        if m1 is False:
+        if m1 is None:
             return m2
         if m2 is False:
             return m1
@@ -125,13 +126,55 @@ class Utils():
             direct_sum.append(zeros_m1*[0]+v)
         return direct_sum
 
+    @staticmethod
+    def square_repmat_in(k:int, A:tuple[tuple[Any]]) -> tuple[tuple[Any]]:
+        '''
+        k * [ [a,b],
+                [c,d] ]
+            ||
+        [ [ a, b,  (a, b)],
+            [ c, d,  (c, d)],
+            [(a, b), (a, b)],
+            [(c, d), (c, d)] ]
+        () k times
+        '''
+        m,n=len(A[0]),len(A)
+        result = [[0]*(k*m) for _ in range(k*n)]
+        for i in range(k):
+            for j in range(k):
+                for s in range(n):
+                    for q in range(m):
+                        result[i*n+s][j*m+q] = A[s][q]
+        return result
+
+    @staticmethod
+    def square_repmat_out(A:tuple[tuple[Any]], k:int) -> tuple[tuple[Any]]:
+        '''
+        [ [a,b],  * k
+            [c,d] ]
+            ||
+        [ [ a, (a),  b,  (b)],
+            [(a),(a), (b), (b)],
+            [ c, (c),  d,  (d)],
+            [(c),(c), (d), (d)] ]
+        () k times
+        '''
+        m,n=len(A[0]),len(A)
+        result = [[0]*(k*m) for _ in range(k*n)]
+        for s in range(n):
+            for q in range(m):
+                for i in range(k):
+                    for j in range(k):
+                        result[i+s*k][j+q*k] = A[s][q]
+        return result
+
     '''def vectToWect(Si, X,ai,aic):
         ''
             Si=(2,3,5,6) (ej)
         ''
         vect_i=makeVector(Si)
         aiUaic=ai.union(aic)
-        #wectj=vectj∗partial(aj∪ ̄aj(0), ̄aj(0))∗partial( aj ∪ aj(0 : 1), ̄aj(1))∗...∗partial(aj ∪ ̄aj, ̄aj(−1));
+        #wectj=vectj*partial(ajU ̄aj(0), ̄aj(0))*partial( aj U aj(0 : 1), ̄aj(1))*...*partial(aj U ̄aj, ̄aj(-1));
         # * = producto de matrices? -> transponer los índices pares (?)
         for aii, index in enumerate(aic):
             vect_i=np.matmul(vect_i,X.get_partial(aiUaic, aii) if index%2==1 else np.transpose(X.get_partial(aiUaic, aii)))

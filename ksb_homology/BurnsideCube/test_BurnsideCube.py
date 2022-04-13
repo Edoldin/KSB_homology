@@ -62,9 +62,9 @@ class BurnsideCubeTest(unittest.TestCase):
         self.assertEqual(a.path((1,4),(1,3,4,6)), ((1,3,4,6),(1,4,6),(1,4)))
 
     def test_double_seq(self):
-        a=BC(2)
+        a=BC(3)
         bot=set()
-        top=((0,1))
+        top=((1,2))
 
         a.set_size(tuple(),2)
         a.set_size((1,),2)
@@ -136,6 +136,13 @@ class BurnsideCubeTest(unittest.TestCase):
         join_cube.set_partial([0,1],1,2)
 
         self.assertEqual(join_cube.is_equal(pp_Join),True)
+    
+    def test_trebol(self):
+        simplex=BC(3)
+        simplex.set_size((),1)
+        simplex.set_size((0,),1)
+        simplex.set_partial((0,),1,[[2]])
+        return simplex
 
 if __name__ == '__main__':
     unittest.main()

@@ -49,8 +49,8 @@ class BurnsideCube():
     def Projective_plane():
         simplex=BurnsideCube(1)
         simplex.set_size((),1)
-        simplex.set_size((1,),1)
-        simplex.set_partial((1,),1,[[2]])
+        simplex.set_size((0,),1)
+        simplex.set_partial((0,),0,[[2]])
         return simplex
 
     '''
@@ -209,9 +209,9 @@ class BurnsideCube():
         #empty must be valid, for each v in vertex v  is in {0,...,N-1}
         for k in vertex:
             if k > len(self)-1 or k<0:
-                return False
+                return [False,"Vertex can not have any point upper to the BurnsideCube lenght"]
         if len(set(vertex)) is not len(vertex):
-            return False
+            return [False,"Vertex can not contain any repeated element"]
         return True
         
     def is_valid(self):
@@ -342,8 +342,8 @@ class BurnsideCube():
         '''
             >>> burnside_cube.set_size([1,2,3], 5)
         '''
-        if(not self.is_vertex_valid(vertex)):
-            raise Exception("vertex not valid")
+        if(self.is_vertex_valid(vertex) is not True):
+            raise Exception("vertex not valid",self.is_vertex_valid(vertex)[1])
         if not isinstance(size, int) or size<0:
             raise TypeError("Size must be a non negative integer")
 
@@ -371,7 +371,7 @@ class BurnsideCube():
             if self._size[vertex] == 0 or self._size[tuple(childVertex)] == 0:
                 return 0
             else:
-                raise Exception("partial of simplex", vertex," ",i, "should be explicitely defined")
+                raise Exception("partial of simplex", vertex, i, "should be explicitely defined")
         else:
             return self._partial[vertex,i]
 
@@ -387,7 +387,7 @@ class BurnsideCube():
         if all(len(column) is matrixM for column in matrix) and len(matrix) is matrixN:
             self._partial[vertex,i]=matrix
         else:
-            raise Exception("value assigned to partial must be a 2 dimensional",(matrixN,matrixM))
+            raise Exception("value assigned to partial %s i:%x must be %xx%x but it's %xx%x"%(",".join(vertex), i, matrixN, matrixM, len(matrix[0]), len(matrix)))
 
     def del_partial(self, vertex, i):
         del self._partial[vertex,i]
@@ -453,7 +453,7 @@ class BurnsideCube():
         for i in self._size:
             union.set_size(i,self._size[i]+other._size[i])
         for i in other._size:
-            if union._size[i] is 0:
+            if union._size[i] == 0:
                 union.set_size(i,self._size[i]+other._size[i])
         '''
             H.partial(vertex,i) = F.partial(vertex,i)⊕G.partial(vertex,i)
@@ -486,44 +486,6 @@ class BurnsideCube():
                 right: (k · A)[ak + q, bk + s] = A[q, s]
                 left:  (A · k)[ak + q, bk + s] = A[a, b]
         '''
-        def scalar_join_multiplication_r(k:int, A:tuple[tuple[int or tuple[int]]]) -> tuple[tuple[int or tuple[int]]]:
-            '''
-            k * [ [a,b],
-                  [c,d] ]
-                ||
-            [ [ a, b,  (a, b)],
-              [ c, d,  (c, d)],
-              [(a, b), (a, b)],
-              [(c, d), (c, d)] ]
-            () k times
-            '''
-            m,n=len(A[0]),len(A)
-            result = [[0]*(k*m) for _ in range(k*n)]
-            for q in range(m):
-                for s in range(n):
-                    for i in range(k):
-                        result[i*q,i*s] = A[q,s]
-            return result
-
-        def scalar_join_multiplication_l(A:tuple[tuple[int or tuple[int]]], k:int) -> tuple[tuple[int or tuple[int]]]:
-            '''
-            [ [a,b],  * k
-              [c,d] ]
-                ||
-            [ [ a, (a),  b,  (b)],
-              [(a),(a), (b), (b)],
-              [ c, (c),  d,  (d)],
-              [(c),(c), (d), (d)] ]
-            () k times
-            '''
-            m,n=len(A[0]),len(A)
-            result = [[0]*(k*m) for _ in range(k*n)]
-            for q in range(m):
-                for s in range(n):
-                    for i in range(k):
-                        result[i+q,i+s] = A[q,s]
-            return result
-
 
         def matrix_join_multiplication(A:tuple[tuple[int]], B:tuple[tuple[int]]) -> tuple[tuple[int]]:
             '''
@@ -550,7 +512,7 @@ class BurnsideCube():
                 for s in range(p):
                     for t in range(n):
                         for u in range(q):
-                            result[r*p+s,t*q+u] = tau( A[r,t], B[s,u])
+                            result[r*p+s][t*q+u] = tau( A[r,t], B[s,u])
 
             return result
         '''
@@ -559,7 +521,7 @@ class BurnsideCube():
         '''
         m=len(self)
         join=BurnsideCube(m+len(other))
-        vertexes = powerset(len(join))
+        vertexes = powerset(list(range(len(join))))
         '''
             J.size(vertex) = F.size(vertex1)·G.size(vertex2)
         '''
@@ -574,9 +536,9 @@ class BurnsideCube():
             '''
             for i in vertex:
                 if i < m:
-                    partial=scalar_join_multiplication_l(self.get_partial(vertex1,i),other.get_size(vertex2))
+                    partial=ut.square_repmat_out(self.get_partial(vertex1,i),other.get_size(vertex2))
                 else:
-                    partial=scalar_join_multiplication_r(self.get_size(vertex1), other.get_partial(vertex2,i-m))
+                    partial=ut.square_repmat_in(self.get_size(vertex1), other.get_partial(vertex2,i-m))
                 join.set_partial(vertex,i,partial)
                 ''' 
                     J.mu(vertex,i,j) =
@@ -586,9 +548,9 @@ class BurnsideCube():
                 '''
                 for j in [v for v in vertex if v > i]:
                     if i < m and j < m:
-                        mu=scalar_join_multiplication_l( self.get_mu(vertex1,i,j), other.get_size(vertex2) )
+                        mu=ut.square_repmat_out( self.get_mu(vertex1,i,j), other.get_size(vertex2) )
                     if i >=m and j >=m:
-                        mu=scalar_join_multiplication_r( self.get_size(vertex1), other.get_mu(vertex2,i-m,j-m) )
+                        mu=ut.square_repmat_in( self.get_size(vertex1), other.get_mu(vertex2,i-m,j-m) )
                     if i < m and j > m:
                         mu=matrix_join_multiplication( self.get_partial(vertex1,i), other.get_partial(vertex2,j-m))
                     join.set_mu(vertex, i, j, mu)
