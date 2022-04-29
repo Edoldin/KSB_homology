@@ -144,23 +144,23 @@ class Ssquares:
         return [pivot, parpivot, level, stop]
 
     @staticmethod #revied to test
-    def global_mu(X,simp,i,j,nC_adapted,level,top):
-        k=len(top)-len(simp)+1
-        for xCsC, yCsC in nC_adapted:
-            lxc=xCsC[level]
-            lyc=yCsC[level]
-            l_1, l_2, l_3=2*k-1, 2*k, 2*k+2
-            xmuIn=[lxc[l_1], lxc[l_2], lxc[l_3]]
-            ymuIn=[lyc[l_1], lyc[l_2], lyc[l_3]]
-            
-            levelmuIn=2*k-3 if k != 1 else 2*k-2
+    def local_mu(X,vertex,i,j,one_nC,level,top):
+        k=len(top)-len(vertex)+1
+        xCsC, yCsC = one_nC
+        lxc=xCsC[level]
+        lyc=yCsC[level]
+        l_1, l_2, l_3=2*k-1, 2*k, 2*k+2
+        xmuIn=[lxc[l_1], lxc[l_2], lxc[l_3]]
+        ymuIn=[lyc[l_1], lyc[l_2], lyc[l_3]]
+        
+        levelmuIn=2*k-3 if k != 1 else 2*k-2
 
-            lxc[l_1], lxc[l_2], lxc[l_3] = list(X.mu(simp, i, j, xCsC[levelmuIn],xCsC[2*level+1])[xmuIn])
-            lyc[l_1], lyc[l_2], lyc[l_3] = list(X.mu(simp, i, j, yCsC[levelmuIn],yCsC[2*level+1])[ymuIn])
+        lxc[l_1], lxc[l_2], lxc[l_3] = list(X.mu(vertex, i, j, xCsC[levelmuIn],xCsC[2*level+1])[xmuIn])
+        lyc[l_1], lyc[l_2], lyc[l_3] = list(X.mu(vertex, i, j, yCsC[levelmuIn],yCsC[2*level+1])[ymuIn])
 
-            for l in range(level+1,len(xCsC)):
-                xCsC[l] = list(xCsC[level])
-                yCsC[l] = list(yCsC[level])
+        for l in range(level+1,len(xCsC)):
+            xCsC[l] = list(xCsC[level])
+            yCsC[l] = list(yCsC[level])
             
 
     @staticmethod #revied to test
@@ -179,7 +179,8 @@ class Ssquares:
                 a=len(aux)
                 simp=Utils.ordered_difference(top,Utils.ordered_union(parallel[level-1],circ[level-1])[0:pivot-1]) # cuidado con los paréntesis, bien(?)
             for p in range(a-2,0,-1):
-                Ssquares.globalmu(Utils.ordered_difference(simp,aux[0:p-1]),aux[p],aux[p+1],nC_adapted,level)#falta
+                for one_nC in nC_adapted:
+                    Ssquares.local_mu(Utils.ordered_difference(simp,aux[0:p-1]),aux[p],aux[p+1],one_nC,level)#falta
                 aux[p,p+1]=aux[p+1,p]
 
         for xcsc,yctc in nC_adapted:

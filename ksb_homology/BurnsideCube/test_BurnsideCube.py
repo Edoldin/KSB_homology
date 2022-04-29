@@ -73,19 +73,19 @@ class BurnsideCubeTest(unittest.TestCase):
 
         partial1=np.array([[1, 3],
                            [1, 1]])
-        a.set_partial((1,2),0,partial1)
+        a.set_partial((1,2),1,partial1)
 
         partial2=np.array([[1, 0],
                            [0, 1]])
-        a.set_partial((1,2),1,partial2)
+        a.set_partial((1,2),2,partial2)
 
         partial3=np.array([[2, 1],
                            [2, 0]])
-        a.set_partial((1,),0,partial3)
+        a.set_partial((1,),1,partial3)
 
         partial4=np.array([[3, 7],
                            [2, 6]])
-        a.set_partial((2,),1,partial4)
+        a.set_partial((2,),2,partial4)
 
         double_sec_Solution=[(0, 0, 1, 0, 1), (0, 0, 1, 0, 2), (0, 0, 1, 0, 3), (0, 0, 1, 1, 1), (0, 0, 1, 1, 2), (0, 1, 1, 0, 1), (0, 1, 1, 0, 2), (0, 1, 1, 0, 3), (0, 1, 1, 0, 4), (0, 1, 1, 0, 5), (0, 1, 1, 0, 6), (0, 1, 1, 0, 7), (0, 1, 1, 1, 1), (0, 1, 1, 1, 2), (0, 1, 1, 1, 3), (0, 1, 1, 1, 4), (0, 1, 1, 1, 5), (0, 1, 1, 1, 6), (1, 0, 1, 0, 1), (1, 0, 1, 0, 2), (1, 0, 1, 0, 3), (1, 0, 2, 0, 0), (1, 0, 2, 0, 1), (1, 0, 2, 0, 2), (1, 0, 2, 0, 3), (1, 0, 3, 0, 0), (1, 0, 3, 0, 1), (1, 0, 3, 0, 2), (1, 0, 3, 0, 3), (1, 0, 1, 1, 1), (1, 0, 1, 1, 2), (1, 0, 2, 1, 0), (1, 0, 2, 1, 1), (1, 0, 2, 1, 2), (1, 0, 3, 1, 0), (1, 0, 3, 1, 1), (1, 0, 3, 1, 2), (1, 1, 1, 0, 1), (1, 1, 1, 0, 2), (1, 1, 1, 0, 3), (1, 1, 1, 0, 4), (1, 1, 1, 0, 5), (1, 1, 1, 0, 6), (1, 1, 1, 0, 7), (1, 1, 1, 1, 1), (1, 1, 1, 1, 2), (1, 1, 1, 1, 3), (1, 1, 1, 1, 4), (1, 1, 1, 1, 5), (1, 1, 1, 1, 6)]
         path=a.path(bot,top,False) #el primer elemento es el más alto
@@ -130,19 +130,16 @@ class BurnsideCubeTest(unittest.TestCase):
         join_cube.set_size([0],1)
         join_cube.set_size([1],1)
         join_cube.set_size([0,1],1,2)
-        join_cube.set_partial([0],0,2)
-        join_cube.set_partial([1],1,2)
-        join_cube.set_partial([0,1],0,2)
-        join_cube.set_partial([0,1],1,2)
+        join_cube.set_partial([0],0,[[2]])
+        join_cube.set_partial([1],1,[[2]])
+        join_cube.set_partial([0,1],0,[[2]])
+        join_cube.set_partial([0,1],1,[[2]])
 
         self.assertEqual(join_cube.is_equal(pp_Join),True)
     
-    def test_trebol(self):
-        simplex=BC(3)
-        simplex.set_size((),1)
-        simplex.set_size((0,),1)
-        simplex.set_partial((0,),1,[[2]])
-        return simplex
+    def test_trefoil(self):
+        trefoil=BC.Trefoil_knot()
+        self.assertEqual(trefoil.is_valid(),True)
 
 if __name__ == '__main__':
     unittest.main()

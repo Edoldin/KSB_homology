@@ -9,7 +9,7 @@ class Double_seq(tuple):
                 vector.append(self[i])
         return vector
 
-    def get_seqEdges(self):
+    def get_edges_seq(self):
         vector=[]
         for i in range(2,len(self)):
             if i%2==0:
@@ -18,7 +18,7 @@ class Double_seq(tuple):
 
     @staticmethod
     def svse_to_s(Double_seq):
-        return tuple(Double_seq.get_vertex_seq(),Double_seq.get_seqEdges())
+        return tuple(Double_seq.get_vertex_seq(),Double_seq.get_edges_seq())
 
     @staticmethod
     def merge_sVertexEdges(vertexValues,edges):

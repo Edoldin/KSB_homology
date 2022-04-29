@@ -6,6 +6,7 @@ if ksb_homology_path not in sys.path:
 
 import unittest
 from ksb_homology.Ssquares import Ssquares
+from ksb_homology.BurnsideCube import BurnsideCube as BC
 
 class SsquaresTest(unittest.TestCase):
 
@@ -306,5 +307,26 @@ class SsquaresTest(unittest.TestCase):
         pivot, parpivot, level, stop = Ssquares.increase(parallel, circ, remain) #24
         self.assertEqual(stop, True)
 
+    def test_local_mu(self):
+        pp1=BC.Projective_plane()
+        pp2=BC.Projective_plane()
+        pp_Join=pp1.Join(pp2)
+
+        vertex=(0,1)
+        i,j=0,1
+        one_double_sec=(((0,0,1,0,1)),((0,0,1,0,2)))
+        level=0
+        top=(0,1)
+        Ssquares.local_mu(pp_Join,vertex,i,j,one_double_sec,level,top)
+        self.assertEqual(one_double_sec, (((0,0,1,0,1)),((0,0,2,0,1))))
+
+        one_double_sec=(((0,0,1,0,1)),((0,0,2,0,2)))
+        Ssquares.local_mu(pp_Join,vertex,i,j,one_double_sec,level,top)
+        self.assertEqual(one_double_sec, (((0,0,1,0,1)),((0,0,2,0,2))))
+
+    def test_global_change(self):
+        #Ssquares.global_change(X, nC, nC_adapted, level, pivot, parpivot)
+        #Ssquares.global_change()
+        return True
 if __name__ == '__main__':
     unittest.main()

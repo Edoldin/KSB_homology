@@ -53,6 +53,34 @@ class BurnsideCube():
         simplex.set_partial((0,),0,[[2]])
         return simplex
 
+    @staticmethod
+    def Trefoil_knot():
+        simplex=BurnsideCube(3)
+        simplex.set_size((),3)
+        simplex.set_size((0,),2)
+        simplex.set_size((1,),2)
+        simplex.set_size((2,),2)
+        simplex.set_size((0,1),1)
+        simplex.set_size((0,2),1)
+        simplex.set_size((1,2),1)
+        simplex.set_size((0,1,2),1)
+
+        simplex.set_partial((0,1,2),0,[[1]])
+        simplex.set_partial((0,1,2),1,[[1]])
+        simplex.set_partial((0,1,2),2,[[1]])
+        
+        simplex.set_partial((0,1),0,[[1],[1]])
+        simplex.set_partial((0,1),1,[[1],[1]])
+        simplex.set_partial((0,2),0,[[1],[1]])
+        simplex.set_partial((0,2),2,[[1],[1]])
+        simplex.set_partial((1,2),1,[[1],[1]])
+        simplex.set_partial((1,2),2,[[1],[1]])
+
+        simplex.set_partial((0,),0,[[1,0],[0,1],[1,0]])
+        simplex.set_partial((1,),1,[[1,0],[0,1],[1,0]])
+        simplex.set_partial((2,),2,[[1,0],[0,1],[1,0]])
+        return simplex
+
     '''
         The empty cube: Define an n-dimensional Burnside cube F:
         • F.size(vertex) = 0 for all vertex
@@ -380,10 +408,12 @@ class BurnsideCube():
             matrix tiene que tener el tamaño:
                 (self.get_size(vertex))x(self.get_size(vertex.remove(i)))
         '''
+        if(i not in vertex):
+            raise Exception("i must be in vertex")
         if(not self.is_vertex_valid(vertex)):
             raise Exception("vertex not valid")
-        matrixN=self.get_size(vertex)
-        matrixM=self.get_size(tuple(set(vertex).difference({i})))
+        matrixM=self.get_size(vertex)
+        matrixN=self.get_size(tuple(set(vertex).difference({i})))
         if all(len(column) is matrixM for column in matrix) and len(matrix) is matrixN:
             self._partial[vertex,i]=matrix
         else:
@@ -547,6 +577,7 @@ class BurnsideCube():
                         F.partial(vertex1,i)*G.partial(vertex2,j-m) if i < m, j ≥ m
                 '''
                 for j in [v for v in vertex if v > i]:
+                    mu=[]
                     if i < m and j < m:
                         mu=ut.square_repmat_out( self.get_mu(vertex1,i,j), other.get_size(vertex2) )
                     if i >=m and j >=m:
